@@ -14,7 +14,7 @@ maks_iterasi = 200  # batas apabila treshold tidak terpenuhi
 
 # %% hyper parameter
 ukuran_populasi = 50
-resolusi = 5
+resolusi = 8
 peluang_mutasi = .04
 treshold = 200
 banyak_pasangan = 17  # harus kurang dari setengah ukuran populasi
@@ -27,13 +27,14 @@ def fungsiFitness(x1, x2):
   return 1 / (h(x1, x2) + 2)
 
 # %% main
-gea = Gea(fungsiFitness, resolusi, ukuran_populasi)
+gea = Gea(fungsiFitness, (-1, 2), (-1, 1), resolusi, ukuran_populasi)
 result, iterasi, fitness_history = gea.fit(treshold=treshold,
                                            maks_iterasi=maks_iterasi,
                                            banyak_pasangan=banyak_pasangan,
                                            peluang_mutasi=peluang_mutasi,
                                            rekam_history=rekam_history,
                                            verbose=verbosity_level)
+
 x1, x2 = result
 
 print('\nBanyak iterasi: %d\n' % iterasi)

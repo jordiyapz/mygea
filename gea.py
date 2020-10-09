@@ -4,24 +4,45 @@ from random import random as rand
 import functools
 from utils import *
 
-# %% class individu
+# %% classes
 class Individu:
-  def __init__(self, kromosom=None, resolusi=5):
+  def __init__(self, range1=(0,1), range2=(0,1), resolusi=5, kromosom=None):
+    assert type(range1) is tuple and len(range1) is 2
+    assert type(range2) is tuple and len(range2) is 2
+
     self.kromosom = kromosom or \
         [round(rand()) for _ in range(resolusi*2)]
+    self.ranges = (range1, range2)
 
   def getFenotip(self):
     mid = len(self.kromosom) // 2
-    f1 = translate(toDecimal(self.kromosom[:mid]), 0, 2**mid-1, -1, 2)
-    f2 = translate(toDecimal(self.kromosom[mid:]), 0, 2**mid-1, -1, 1)
+    up = 2**mid-1
+    f1 = translate(toDecimal(self.kromosom[:mid]),
+                   0, up,
+                   self.ranges[0][0],
+                   self.ranges[0][1])
+    f2 = translate(toDecimal(self.kromosom[mid:]),
+                   0, up,
+                   self.ranges[1][0],
+                   self.ranges[1][1])
     return (f1, f2)
 
 class Gea:
-  def __init__(self, fungsiFitness, resolusi, ukuran_populasi=50):
+  def __init__(self,
+               fungsiFitness,
+               range1,
+               range2,
+               resolusi,
+               ukuran_populasi=50):
+    assert type(range1) is tuple and len(range1) is 2
+    assert type(range2) is tuple and len(range2) is 2
+
     self.fungsiFitness = fungsiFitness
-    self.populasi = [Individu(resolusi=resolusi)
-                     for _ in range(ukuran_populasi)]
     self.fitness = 0
+    self.resolusi = resolusi,
+    self.ranges = (range1, range2)
+    self.populasi = [Individu(range1, range2, resolusi)
+                     for _ in range(ukuran_populasi)]
 
   def __hitungFitness(self):
     fitness_list = []
@@ -95,6 +116,7 @@ class Gea:
     fitness_list = self.__hitungFitness()
     peluang_list = self.__hitungPeluang(fitness_list)
     best_fit = max(fitness_list)
+    self.fitness = best_fit
 
     if rekam_history:
       fitness_history.append(best_fit)
@@ -115,9 +137,14 @@ class Gea:
       for pasangan_idx in pasangan_index_ortu[:min(
           banyak_pasangan, len(pasangan_index_ortu))]:
         pasangan = tuple(self.populasi[idx] for idx in pasangan_idx)
-        k1, k2 = self.__pindahSilang(pasangan)
-        populasi_baru.append(Individu(k1))
-        populasi_baru.append(Individu(k2))
+        kromosom_list = self.__pindahSilang(pasangan)
+        for kromosom in kromosom_list:
+          populasi_baru.append(Individu(
+            self.ranges[0],
+            self.ranges[1],
+            self.resolusi,
+            kromosom
+          ))
 
       l = len(self.populasi) - len(populasi_baru)
       self.populasi[l:] = populasi_baru
