@@ -10,14 +10,7 @@ from gea import *
 # %% pengaturan
 verbosity_level = 0  # rentang [0, 2]
 rekam_history = True  # set True jika butuh graph
-maks_iterasi = 1000  # batas apabila treshold tidak terpenuhi
-
-# %% fungsi hipothesis dan fitness
-def h(x1, x2):
-  return cos(x1) * sin(x2) - x1 / (x2**2 + 1)
-
-def fungsiFitness(x1, x2):
-  return 1 / (h(x1, x2) + 2)
+maks_iterasi = 200  # batas apabila treshold tidak terpenuhi
 
 # %% hyper parameter
 ukuran_populasi = 50
@@ -26,52 +19,25 @@ peluang_mutasi = .04
 treshold = 200
 banyak_pasangan = 17  # harus kurang dari setengah ukuran populasi
 
+# %% fungsi hipothesis dan fitness
+def h(x1, x2):
+  return cos(x1) * sin(x2) - x1 / (x2**2 + 1)
+
+def fungsiFitness(x1, x2):
+  return 1 / (h(x1, x2) + 2)
+
 # %% main
-iterasi = 0
-populasi = [Individu(resolusi=resolusi) for _ in range(ukuran_populasi)]
-fitness_history = []
-
-fitness_list = hitungFitness(fungsiFitness, populasi)
-peluang_list = hitungPeluang(fitness_list)
-best_fit = max(fitness_list)
-if rekam_history:
-  fitness_history.append(best_fit)
-
-printTabel(populasi, fitness_list, peluang_list, verbose=verbosity_level)
-
-while iterasi < maks_iterasi and best_fit < treshold:
-  # print('Generasi: %d' % i)
-  pasangan_index_ortu = seleksiOrtu(peluang_list)
-
-  # regenerasi
-  populasi = urutanPopulasi(populasi, fitness_list)
-  populasi_baru = []
-
-  for pasangan_idx in pasangan_index_ortu[:min(
-      banyak_pasangan, len(pasangan_index_ortu))]:
-    pasangan = tuple(populasi[idx] for idx in pasangan_idx)
-    k1, k2 = pindahSilang(pasangan)
-    populasi_baru.append(Individu(k1))
-    populasi_baru.append(Individu(k2))
-
-  l = len(populasi) - len(populasi_baru)
-  populasi[l:] = populasi_baru
-  mutasi(populasi, peluang_mutasi)
-
-  # kalkulasi fitness
-  fitness_list = hitungFitness(fungsiFitness, populasi)
-  best_fit = max(fitness_list)
-  if rekam_history:
-    fitness_history.append(best_fit)
-
-  printTabel(populasi, fitness_list, peluang_list, verbose=verbosity_level)
-  iterasi += 1
+gea = Gea(fungsiFitness, resolusi, ukuran_populasi)
+result, iterasi, fitness_history = gea.fit(treshold=treshold,
+                                           maks_iterasi=maks_iterasi,
+                                           banyak_pasangan=banyak_pasangan,
+                                           peluang_mutasi=peluang_mutasi,
+                                           rekam_history=rekam_history,
+                                           verbose=verbosity_level)
+x1, x2 = result
 
 print('\nBanyak iterasi: %d\n' % iterasi)
-
-# %% hasil
-idx = fitness_list.index(best_fit)
-x1, x2 = populasi[idx].getFenotip()
+print('fitness = %f' % gea.fitness)
 print('h(x1, x2) = %f' % h(x1, x2))
 print('x1 = %f' % x1)
 print('x2 = %f' % x2)
