@@ -9,6 +9,7 @@ from utils import *
 class Stop(enum.Enum):
   MAX_IT = 0
   TRESHOLD = 1
+  NO_IMPROVE = 3
 
 # %% classes
 class Individu:
@@ -94,8 +95,7 @@ class Gea:
       if r < batas:
         return idx
 
-  def __seleksiOrtu(self, peluang_list):
-    banyak_pasangan = len(peluang_list) // 2
+  def __seleksiOrtu(self, peluang_list, banyak_pasangan):
     return [(self.__rouletteWheel(peluang_list),
             self.__rouletteWheel(peluang_list))
             for _ in range(banyak_pasangan)]
@@ -122,9 +122,12 @@ class Gea:
           stopping_crit:tuple=(Stop.MAX_IT,),
           maks_generasi:int=200,
           banyak_pasangan:int=17,
+          crossover_rate:float=.5,
           peluang_mutasi:float=.03,
           rekam_history:bool=True,
           verbose=2):
+    assert crossover_rate >= 0 and crossover_rate <= 1
+
     iterasi = 0
     fitness_history = []
 
@@ -145,16 +148,27 @@ class Gea:
       if stopping_crit[0] == Stop.TRESHOLD:
         if self.fitness >= stopping_crit[1]:
           break
+      elif stopping_crit[0] == Stop.NO_IMPROVE:
+        l = len(fitness_history)
+        if l > stopping_crit[1]:
+          is_improving = False
+          for i in range(stopping_crit[1]):
+            if fitness_history[l-1-i] != fitness_history[l-i-2]:
+              is_improving = True
+              break
+          if not is_improving:
+            # stop iteration
+            break
 
-      # print('Generasi: %d' % i)
-      pasangan_index_ortu = self.__seleksiOrtu(peluang_list)
+      banyak_pasangan = round((self.ukuran_populasi * crossover_rate) / 2)
+      assert banyak_pasangan < self.ukuran_populasi / 2
+      pasangan_index_ortu = self.__seleksiOrtu(peluang_list, banyak_pasangan)
 
       # regenerasi
       self.populasi = self.__urutanPopulasi(self.populasi, fitness_list)
       populasi_baru = []
 
-      for pasangan_idx in pasangan_index_ortu[:min(
-          banyak_pasangan, len(pasangan_index_ortu))]:
+      for pasangan_idx in pasangan_index_ortu:
         pasangan = tuple(self.populasi[idx] for idx in pasangan_idx)
         kromosom_list = self.__pindahSilang(pasangan)
         for kromosom in kromosom_list:
@@ -188,3 +202,4 @@ class Gea:
     x1, x2 = self.populasi[idx].getFenotip()
 
     return ((x1, x2), iterasi, fitness_history)
+# %%

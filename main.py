@@ -16,15 +16,17 @@ rekam_history = True  # set True jika butuh graph
 plt.style.use('seaborn-whitegrid')
 
 # %% hyper parameter
-ukuran_populasi = 50
+ukuran_populasi = 500
 resolusi = 10
-peluang_mutasi = .05
-banyak_pasangan = 17  # harus kurang dari setengah ukuran populasi
-maks_generasi = int((10000 - ukuran_populasi + banyak_pasangan * 2) \
-                   / (banyak_pasangan * 2))
+peluang_mutasi = .09
+crossover_rate = .7
+maks_generasi = int((10000 - ukuran_populasi * (1 - crossover_rate)) \
+                   / (ukuran_populasi * crossover_rate))
+print('Maksimum generasi:', maks_generasi)
 
-stopping_crit = (gea.Stop.TRESHOLD, 5.021)
-
+# stopping_crit = (gea.Stop.TRESHOLD, 5.0218)   # fungsi kurang
+stopping_crit = (gea.Stop.TRESHOLD, 16.49)  # fungsi eksponen
+# stopping_crit = (gea.Stop.NO_IMPROVE, 10)
 # %% fungsi hipothesis dan fitness
 def h(x1, x2):
   return m.cos(x1) * m.sin(x2) - x1 / (x2**2 + 1)
@@ -35,16 +37,19 @@ def fungsiFitnessKurang(x1, x2):
 def fungsiFitnessBagi(x1, x2):
   return 1 / (h(x1, x2) + 2)
 
+def fungsiFitnessEksponen(x1, x2):
+  return pow(4, -h(x1, x2))
+
 # %% single run
-gen = gea.Gea(fungsi_fitness=fungsiFitnessKurang,
-          range1=(-1, 2),
-          range2=(-1, 1),
-          resolusi=resolusi,
-          ukuran_populasi=ukuran_populasi)
+gen = gea.Gea(fungsi_fitness=fungsiFitnessEksponen,
+              range1=(-1, 2),
+              range2=(-1, 1),
+              resolusi=resolusi,
+              ukuran_populasi=ukuran_populasi)
 
 result, iterasi, fitness_history = gen.fit(stopping_crit=stopping_crit,
                                            maks_generasi=maks_generasi,
-                                           banyak_pasangan=banyak_pasangan,
+                                           crossover_rate=crossover_rate,
                                            peluang_mutasi=peluang_mutasi,
                                            rekam_history=rekam_history,
                                            verbose=verbosity_level)
@@ -65,24 +70,25 @@ if rekam_history:
 else:
   print('Tidak ada rekaman')
 
-# %% multiple run
+# %% Statistik
 
 num_of_run = 20
 
-gen = gea.Gea(fungsi_fitness=fungsiFitnessKurang,
-          range1=(-1, 2),
-          range2=(-1, 1),
-          resolusi=resolusi,
-          ukuran_populasi=ukuran_populasi)
 best_fit_hist = []
 iterasi_hist = []
+
+gen = gea.Gea(fungsi_fitness=fungsiFitnessEksponen,
+              range1=(-1, 2),
+              range2=(-1, 1),
+              resolusi=resolusi,
+              ukuran_populasi=ukuran_populasi)
 
 print('Running', end='')
 for _ in range(num_of_run):
   gen.reset()
   result, iterasi, _ = gen.fit(stopping_crit=stopping_crit,
                               maks_generasi=maks_generasi,
-                              banyak_pasangan=banyak_pasangan,
+                              crossover_rate=crossover_rate,
                               peluang_mutasi=peluang_mutasi,
                               rekam_history=rekam_history,
                               verbose=verbosity_level)
@@ -97,11 +103,13 @@ print('Rata-rata fitness akhir:', sum(best_fit_hist)/num_of_run)
 plt.subplot(1,2,1)
 plt.title('Histogram Fitness')
 plt.xlabel('fitness')
+plt.ylabel('frekuensi')
 _ = plt.hist(best_fit_hist)
 
-# plt.tight_layout(pad=4.0)
+plt.tight_layout(pad=2.5)
 plt.subplot(1,2,2)
 plt.title('Histogram #Generasi')
 plt.xlabel('banyak generasi')
 _ = plt.hist(iterasi_hist)
+
 # %%
