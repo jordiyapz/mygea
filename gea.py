@@ -1,12 +1,22 @@
 # %% import
 from math import cos, sin, floor
 from random import random as rand
+import enum
 import functools
 from utils import *
 
+# %% enumerasi
+class Stop(enum.Enum):
+  MAX_IT = 0
+  TRESHOLD = 1
+
 # %% classes
 class Individu:
-  def __init__(self, range1=(0,1), range2=(0,1), resolusi=5, kromosom=None):
+  def __init__(self,
+                range1:tuple=(0,1),
+                range2:tuple=(0,1),
+                resolusi:int=5,
+                kromosom:list=None):
     assert type(range1) is tuple and len(range1) is 2
     assert type(range2) is tuple and len(range2) is 2
 
@@ -29,26 +39,31 @@ class Individu:
 
 class Gea:
   def __init__(self,
-               fungsiFitness,
-               range1,
-               range2,
-               resolusi,
+               fungsi_fitness:callable,
+               range1:tuple,
+               range2:tuple,
+               resolusi:int,
                ukuran_populasi=50):
     assert type(range1) is tuple and len(range1) is 2
     assert type(range2) is tuple and len(range2) is 2
 
-    self.fungsiFitness = fungsiFitness
-    self.fitness = 0
-    self.resolusi = resolusi,
+    self.fungsi_fitness = fungsi_fitness
+    self.resolusi = resolusi
     self.ranges = (range1, range2)
-    self.populasi = [Individu(range1, range2, resolusi)
-                     for _ in range(ukuran_populasi)]
+    self.ukuran_populasi = ukuran_populasi
+    self.reset()
+
+  def reset(self):
+    self.fitness = 0
+    range1, range2 = self.ranges
+    self.populasi = [Individu(range1, range2, self.resolusi)
+                     for _ in range(self.ukuran_populasi)]
 
   def __hitungFitness(self):
     fitness_list = []
     for individu in self.populasi:
       x1, x2 = individu.getFenotip()
-      fit = self.fungsiFitness(x1, x2)
+      fit = self.fungsi_fitness(x1, x2)
       fitness_list.append(fit)
     return fitness_list
 
@@ -104,11 +119,11 @@ class Gea:
     return populasi_terurut
 
   def fit(self,
-          treshold=200,
-          maks_iterasi=200,
-          banyak_pasangan=17,
-          peluang_mutasi=.03,
-          rekam_history=True,
+          stopping_crit:tuple=(Stop.MAX_IT,),
+          maks_generasi:int=200,
+          banyak_pasangan:int=17,
+          peluang_mutasi:float=.03,
+          rekam_history:bool=True,
           verbose=2):
     iterasi = 0
     fitness_history = []
@@ -126,7 +141,11 @@ class Gea:
                         peluang_list,
                         verbose=verbose)
 
-    while iterasi < maks_iterasi and best_fit < treshold:
+    while iterasi < maks_generasi:
+      if stopping_crit[0] == Stop.TRESHOLD:
+        if self.fitness >= stopping_crit[1]:
+          break
+
       # print('Generasi: %d' % i)
       pasangan_index_ortu = self.__seleksiOrtu(peluang_list)
 

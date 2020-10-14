@@ -1,4 +1,5 @@
 # %% fungsi-fungsi umum
+
 def translate(value, leftMin, leftMax, rightMin, rightMax):
   leftSpan = leftMax - leftMin
   rightSpan = rightMax - rightMin
@@ -11,3 +12,11 @@ def toDecimal(bin_list):
   for i, x in enumerate(bin_list):
     dec += pow(2, l - i) * x
   return dec
+
+# %% plotting
+
+def histogram(arr:list):
+  hist = {}
+  for i in arr:
+      hist[i] = hist.get(i, 0) + 1
+  return hist
