@@ -71,7 +71,6 @@ else:
   print('Tidak ada rekaman')
 
 # %% Statistik
-
 num_of_run = 20
 
 best_fit_hist = []

@@ -121,7 +121,6 @@ class Gea:
   def fit(self,
           stopping_crit:tuple=(Stop.MAX_IT,),
           maks_generasi:int=200,
-          banyak_pasangan:int=17,
           crossover_rate:float=.5,
           peluang_mutasi:float=.03,
           rekam_history:bool=True,
