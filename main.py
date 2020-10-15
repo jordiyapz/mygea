@@ -8,10 +8,9 @@
 from matplotlib import pyplot as plt
 import gea
 import math as m
-from utils import histogram
 
 # %% pengaturan
-verbosity_level = 0  # rentang [0, 2]
+verbosity_level = 1  # rentang [0, 3]
 rekam_history = True  # set True jika butuh graph
 plt.style.use('seaborn-whitegrid')
 
@@ -30,10 +29,24 @@ def fungsiFitnessEksponen(fenotip):
   return pow(4, -h(fenotip))
 
 # %% hyper parameter
+
+""" tebakan terbaik
+# hasil:
+# rata-rata generasi = 8.45
+# rata-rata fitness = 16.4908
+
 ukuran_populasi = 750
 resolusi = 10
 peluang_mutasi = .09
 crossover_rate = .7
+"""
+
+# hasil tuning
+ukuran_populasi = 779
+resolusi = 8
+peluang_mutasi = 0.021176470588235297
+crossover_rate = 0.8694117647058823
+
 fungsiFitness = fungsiFitnessEksponen
 maks_generasi = int((10000 - ukuran_populasi * (1 - crossover_rate)) \
                    / (ukuran_populasi * crossover_rate))
@@ -46,8 +59,7 @@ stopping_crit = (gea.Stop.TRESHOLD, 16.49)  # fungsi eksponen
 
 # %% single run
 gen = gea.Gea(fungsi_fitness=fungsiFitness,
-              range1=(-1, 2),
-              range2=(-1, 1),
+              ranges=((-1, 2), (-1, 1)),
               resolusi=resolusi,
               ukuran_populasi=ukuran_populasi)
 
@@ -58,7 +70,7 @@ fenotip, iterasi, fitness_history = gen.fit(stopping_crit=stopping_crit,
                                             rekam_history=rekam_history,
                                             verbose=verbosity_level)
 
-print('\nBanyak iterasi: %d\n' % iterasi)
+print('\nBanyak generasi: %d\n' % iterasi)
 print('fitness = %f' % fungsiFitness(fenotip))
 print('h(x1, x2) = %f' % h(fenotip))
 print('x1 = %f' % fenotip[0])
@@ -79,8 +91,7 @@ best_fit_hist = []
 iterasi_hist = []
 
 gen = gea.Gea(fungsi_fitness=fungsiFitness,
-              range1=(-1, 2),
-              range2=(-1, 1),
+              ranges=((-1, 2), (-1, 1)),
               resolusi=resolusi,
               ukuran_populasi=ukuran_populasi)
 
@@ -92,11 +103,11 @@ for _ in range(num_of_run):
                               crossover_rate=crossover_rate,
                               peluang_mutasi=peluang_mutasi,
                               rekam_history=rekam_history,
-                              verbose=verbosity_level)
+                              verbose=0)
   best_fit_hist.append(fungsiFitness(fenotip))
   iterasi_hist.append(iterasi)
   print('.', end='')
-print('done')
+print(' done!')
 
 print('Rata-rata banyak generasi:', sum(iterasi_hist)/num_of_run)
 print('Rata-rata fitness akhir:', sum(best_fit_hist)/num_of_run)
@@ -114,9 +125,3 @@ plt.xlabel('banyak generasi')
 _ = plt.hist(iterasi_hist)
 
 # %% experiment lab
-import gea
-for i in range(0):
-  individu = gea.Individu(((-1,2), (-1, 1)), 10)
-  fen = individu.getFenotip()
-  if fen[0] > 1 or fen[1] > 0:
-    print(fen)

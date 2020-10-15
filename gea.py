@@ -37,16 +37,16 @@ class Individu:
 class Gea:
   def __init__(self,
                fungsi_fitness:callable,
-               range1:tuple,
-               range2:tuple,
+               ranges:tuple,
                resolusi:int,
                ukuran_populasi=50):
-    assert type(range1) is tuple and len(range1) is 2
-    assert type(range2) is tuple and len(range2) is 2
+
+    for rg in ranges:
+      assert len(rg) is 2
 
     self.fungsi_fitness = fungsi_fitness
     self.resolusi = resolusi
-    self.ranges = (range1, range2)
+    self.ranges = ranges
     self.ukuran_populasi = ukuran_populasi
     self.reset()
 
@@ -70,13 +70,13 @@ class Gea:
     return peluang_list
 
   def __printTabel(self, fitness_list, peluang_list, verbose=2):
-    if verbose > 0:
-      print('x1', 'x2', 'fitness', 'peluang', 'kromosom', sep='\t')
+    if verbose > 2:
+      print('fen', 'fitness', 'peluang', 'kromosom', sep='\t')
       for individu, fit, peluang in zip(self.populasi,
                                         fitness_list,
                                         peluang_list):
-        x1, x2 = individu.getFenotip()
-        print('%.2f' % x1, '%.2f' % x2,
+        fen = individu.getFenotip()
+        print(tuple('%.2f' % f for f in fen),
               '%.2f' % fit,
               '%.2f' % peluang,
               individu.kromosom,
@@ -121,11 +121,30 @@ class Gea:
     self.best_individu = self.populasi[fitness_list.index(best_fit)]
 
     if verbose:
-      self.__printTabel(fitness_list,
-                        peluang_list,
-                        verbose=verbose)
+      if verbose is 1:
+        print('*', end='')
+      else :
+        self.__printTabel(fitness_list, peluang_list, verbose)
 
     return (best_fit, peluang_list)
+
+  def __routineRegenerasi(self, peluang_list, crossover_rate):
+    banyak_pasangan = round((self.ukuran_populasi * crossover_rate) / 2)
+    pasangan_index_ortu = self.__seleksiOrtu(peluang_list, banyak_pasangan)
+
+    self.populasi = self.__urutanPopulasi(self.populasi, peluang_list)
+    populasi_baru = []
+
+    for pasangan_idx in pasangan_index_ortu:
+      pasangan = tuple(self.populasi[idx] for idx in pasangan_idx)
+      kromosom_list = self.__pindahSilang(pasangan)
+      for kromosom in kromosom_list:
+        populasi_baru.append(Individu(self.ranges,
+                                      self.resolusi,
+                                      kromosom))
+
+    l = len(self.populasi) - len(populasi_baru)
+    self.populasi[l:] = populasi_baru
 
   def fit(self,
           stopping_crit:tuple=(Stop.MAX_IT,),
@@ -133,23 +152,30 @@ class Gea:
           crossover_rate:float=.5,
           peluang_mutasi:float=.03,
           rekam_history:bool=True,
-          verbose=2):
+          verbose=1):
     assert crossover_rate >= 0 and crossover_rate <= 1
 
     iterasi = 0
     fitness_history = []
 
+    if verbose is 1:
+      print('Progress: [', end='')
+
     best_fit, peluang_list = self.__routineFitPel(verbose)
+
 
     if rekam_history:
       fitness_history.append(best_fit)
+
 
     while iterasi < maks_generasi:
 
       # mulai mekanisme stopping
       if stopping_crit[0] == Stop.TRESHOLD:
         if best_fit >= stopping_crit[1]:
+          # stop iterasi
           break
+
       elif stopping_crit[0] == Stop.NO_IMPROVE:
         l = len(fitness_history)
         if l > stopping_crit[1]:
@@ -163,33 +189,17 @@ class Gea:
             break
       # akhir mekanisme stopping
 
-      banyak_pasangan = round((self.ukuran_populasi * crossover_rate) / 2)
-      assert banyak_pasangan < self.ukuran_populasi / 2
-      pasangan_index_ortu = self.__seleksiOrtu(peluang_list, banyak_pasangan)
-
-      # regenerasi
-      self.populasi = self.__urutanPopulasi(self.populasi, peluang_list)
-      populasi_baru = []
-
-      for pasangan_idx in pasangan_index_ortu:
-        pasangan = tuple(self.populasi[idx] for idx in pasangan_idx)
-        kromosom_list = self.__pindahSilang(pasangan)
-        for kromosom in kromosom_list:
-          populasi_baru.append(Individu(self.ranges,
-                                        self.resolusi,
-                                        kromosom)
-                              )
-
-      l = len(self.populasi) - len(populasi_baru)
-      self.populasi[l:] = populasi_baru
+      self.__routineRegenerasi(peluang_list, crossover_rate)
       self.__mutasi(peluang_mutasi)
-
       best_fit, peluang_list = self.__routineFitPel(verbose)
 
       if rekam_history:
         fitness_history.append(best_fit)
 
       iterasi += 1
+
+    if verbose is 1:
+      print(']')
 
     fenotip = self.best_individu.getFenotip()
 
