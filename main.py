@@ -16,7 +16,7 @@ rekam_history = True  # set True jika butuh graph
 plt.style.use('seaborn-whitegrid')
 
 # %% hyper parameter
-ukuran_populasi = 500
+ukuran_populasi = 750
 resolusi = 10
 peluang_mutasi = .09
 crossover_rate = .7
@@ -24,9 +24,10 @@ maks_generasi = int((10000 - ukuran_populasi * (1 - crossover_rate)) \
                    / (ukuran_populasi * crossover_rate))
 print('Maksimum generasi:', maks_generasi)
 
+# stopping_crit = (gea.Stop.MAX_IT,)
 # stopping_crit = (gea.Stop.TRESHOLD, 5.0218)   # fungsi kurang
 stopping_crit = (gea.Stop.TRESHOLD, 16.49)  # fungsi eksponen
-# stopping_crit = (gea.Stop.NO_IMPROVE, 10)
+# stopping_crit = (gea.Stop.NO_IMPROVE, round(maks_generasi*.4))
 # %% fungsi hipothesis dan fitness
 def h(x1, x2):
   return m.cos(x1) * m.sin(x2) - x1 / (x2**2 + 1)
