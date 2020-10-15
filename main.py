@@ -113,4 +113,10 @@ plt.title('Histogram #Generasi')
 plt.xlabel('banyak generasi')
 _ = plt.hist(iterasi_hist)
 
-# %%
+# %% experiment lab
+import gea
+for i in range(0):
+  individu = gea.Individu(((-1,2), (-1, 1)), 10)
+  fen = individu.getFenotip()
+  if fen[0] > 1 or fen[1] > 0:
+    print(fen)

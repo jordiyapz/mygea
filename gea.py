@@ -7,36 +7,32 @@ from utils import *
 
 # %% enumerasi
 class Stop(enum.Enum):
-  MAX_IT = 0
-  TRESHOLD = 1
-  NO_IMPROVE = 3
+  MAX_IT = 0      # always on, stop when max iteration reached
+  TRESHOLD = 1    # stop if fitness >= treshold value
+  NO_IMPROVE = 3  # stop if no improvement for certain generation
 
 # %% classes
 class Individu:
   def __init__(self,
-                range1:tuple=(0,1),
-                range2:tuple=(0,1),
+                ranges:tuple=((0,1),(0,1)),
                 resolusi:int=5,
                 kromosom:list=None):
-    assert type(range1) is tuple and len(range1) is 2
-    assert type(range2) is tuple and len(range2) is 2
+
+    assert type(ranges) is tuple
+    for rg in ranges:
+      assert len(rg) is 2
 
     self.kromosom = kromosom or \
-        [round(rand()) for _ in range(resolusi*2)]
-    self.ranges = (range1, range2)
+        [round(rand()) for _ in range(resolusi * len(ranges))]
+    self.res = resolusi
+    self.ranges = ranges
 
   def getFenotip(self):
-    mid = len(self.kromosom) // 2
-    up = 2**mid-1
-    f1 = translate(toDecimal(self.kromosom[:mid]),
-                   0, up,
-                   self.ranges[0][0],
-                   self.ranges[0][1])
-    f2 = translate(toDecimal(self.kromosom[mid:]),
-                   0, up,
-                   self.ranges[1][0],
-                   self.ranges[1][1])
-    return (f1, f2)
+    l = self.res
+    up = 2**l-1
+    return tuple(translate(toDecimal(self.kromosom[l*i:l*(i+1)]),
+                                      0, up, ran[0], ran[1]) \
+                  for i, ran in enumerate(self.ranges))
 
 class Gea:
   def __init__(self,
@@ -52,14 +48,12 @@ class Gea:
     self.resolusi = resolusi
     self.ranges = (range1, range2)
     self.ukuran_populasi = ukuran_populasi
-    self.best_individu = None
     self.reset()
 
   def reset(self):
     self.best_individu = None
     self.fitness = 0
-    range1, range2 = self.ranges
-    self.populasi = [Individu(range1, range2, self.resolusi)
+    self.populasi = [Individu(self.ranges, self.resolusi)
                      for _ in range(self.ukuran_populasi)]
 
   def __hitungFitness(self):
@@ -109,10 +103,10 @@ class Gea:
     return (k1, k2)
 
   def __mutasi(self, peluang_mutasi):
-    for i in self.populasi:
+    for individu in self.populasi:
       if (rand() < peluang_mutasi):
-        posisi = floor(rand() * len(i.kromosom))
-        i.kromosom[posisi] = (i.kromosom[posisi] + 1) % 2
+        posisi = floor(rand() * len(individu.kromosom))
+        individu.kromosom[posisi] = (individu.kromosom[posisi] + 1) % 2
 
   def __urutanPopulasi(self, populasi, urutan):
     urutan_list = sorted(range(len(urutan)), key=lambda i: urutan[i])
@@ -181,12 +175,10 @@ class Gea:
         pasangan = tuple(self.populasi[idx] for idx in pasangan_idx)
         kromosom_list = self.__pindahSilang(pasangan)
         for kromosom in kromosom_list:
-          populasi_baru.append(Individu(
-            self.ranges[0],
-            self.ranges[1],
-            self.resolusi,
-            kromosom
-          ))
+          populasi_baru.append(Individu(self.ranges,
+                                        self.resolusi,
+                                        kromosom)
+                              )
 
       l = len(self.populasi) - len(populasi_baru)
       self.populasi[l:] = populasi_baru
