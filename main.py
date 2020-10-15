@@ -70,11 +70,11 @@ fenotip, iterasi, fitness_history = gen.fit(stopping_crit=stopping_crit,
                                             rekam_history=rekam_history,
                                             verbose=verbosity_level)
 
-print('\nBanyak generasi: %d\n' % iterasi)
-print('fitness = %f' % fungsiFitness(fenotip))
-print('h(x1, x2) = %f' % h(fenotip))
-print('x1 = %f' % fenotip[0])
-print('x2 = %f' % fenotip[1])
+print('Banyak generasi:', iterasi)
+print('fitness =', fungsiFitness(fenotip))
+print('h(x1, x2) =', h(fenotip))
+print('x1 =', fenotip[0])
+print('x2 =', fenotip[1])
 
 if rekam_history:
   plt.title('Fitness History')

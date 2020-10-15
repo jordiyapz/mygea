@@ -1,3 +1,17 @@
+# ========= Tuner genetika =========
+# untuk mencari parameter algoritma genetika
+# cukup digunakan sekali untuk memperoleh parameter
+# genetika yang dibutuhkan.
+#
+# ditulis oleh Jordi Yaputra (130110353)
+
+""" Segel
+# [dapat buka dengan cara berikan '#' di baris awal dan
+# akhir komentar]
+#
+# Untuk mencegah file ini dijalankan tanpa sengaja karena
+# dapat memakan waktu dan resources yang cukup besar.
+
 # %% import
 from matplotlib import pyplot as plt
 import gea
@@ -41,7 +55,7 @@ def tuner_fit_func(fenotip):
   mean_fit, mean_it = tuner_h(fenotip)
   return mean_fit/17 * 1/mean_it
 
-# %%
+# %% Skala yang perlu diatur
 ranges = (
   (50, 800),  # ukuran populasi
   (4, 10),    # resolusi
@@ -64,4 +78,5 @@ print(fen)
 print(tuner_h(fen))
 
 plt.plot(rekaman)
-# %%
+
+"""
