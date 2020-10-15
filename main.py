@@ -41,11 +41,41 @@ peluang_mutasi = .09
 crossover_rate = .7
 """
 
-# hasil tuning
+""" hasil tuning #1
+# hasil:
+# rata-rata generasi = 6.05
+# rata-rata fitness  = 16.49107486703866
+# selalu konvergen global
+
 ukuran_populasi = 779
 resolusi = 8
 peluang_mutasi = 0.021176470588235297
 crossover_rate = 0.8694117647058823
+"""
+
+""" hasil tuning #2
+# hasil:
+# rata-rata generasi = 4.2
+# rata-rata fitness  = 16.4905685130365
+# selalu konvergen global
+
+ukuran_populasi = 591
+resolusi = 7
+peluang_mutasi = 0.13592156862745097
+crossover_rate = 0.9470588235294117
+"""
+
+# """ hasil tuning #3
+# hasil:
+# rata-rata generasi = 3.4
+# rata-rata fitness  = 16.4905685130365
+# selalu konvergen global
+
+ukuran_populasi = 797
+resolusi = 7
+peluang_mutasi = 0.16945098039215686
+crossover_rate = 0.9400000000000001
+# """
 
 fungsiFitness = fungsiFitnessEksponen
 maks_generasi = int((10000 - ukuran_populasi * (1 - crossover_rate)) \
@@ -55,7 +85,7 @@ print('Maksimum generasi:', maks_generasi)
 # stopping_crit = (gea.Stop.MAX_IT,)
 # stopping_crit = (gea.Stop.TRESHOLD, 5.0218)   # fungsi kurang
 stopping_crit = (gea.Stop.TRESHOLD, 16.49)  # fungsi eksponen
-# stopping_crit = (gea.Stop.NO_IMPROVE, round(maks_generasi*.4))
+# stopping_crit = (gea.Stop.NO_IMPROVE, round(maks_generasi*.2))
 
 # %% single run
 gen = gea.Gea(fungsi_fitness=fungsiFitness,

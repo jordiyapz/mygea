@@ -51,7 +51,7 @@ class Gea:
     self.reset()
 
   def reset(self):
-    self.best_individu = None
+    self.best_individu = (None, 0)
     self.fitness = 0
     self.populasi = [Individu(self.ranges, self.resolusi)
                      for _ in range(self.ukuran_populasi)]
@@ -118,7 +118,9 @@ class Gea:
     fitness_list = self.__hitungFitness()
     peluang_list = self.__hitungPeluang(fitness_list)
     best_fit = max(fitness_list)
-    self.best_individu = self.populasi[fitness_list.index(best_fit)]
+    if best_fit > self.best_individu[1]:
+      self.best_individu = (self.populasi[fitness_list.index(best_fit)],
+                            best_fit)
 
     if verbose:
       if verbose is 1:
@@ -201,7 +203,7 @@ class Gea:
     if verbose is 1:
       print(']')
 
-    fenotip = self.best_individu.getFenotip()
+    fenotip = self.best_individu[0].getFenotip()
 
     return (fenotip, iterasi, fitness_history)
 # %%

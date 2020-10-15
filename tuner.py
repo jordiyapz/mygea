@@ -6,8 +6,8 @@
 # ditulis oleh Jordi Yaputra (130110353)
 
 """ Segel
-# [dapat buka dengan cara berikan '#' di baris awal dan
-# akhir komentar]
+# [dapat buka dengan cara berikan '#' di baris 8 dan
+# baris akhir]
 #
 # Untuk mencegah file ini dijalankan tanpa sengaja karena
 # dapat memakan waktu dan resources yang cukup besar.
@@ -15,7 +15,7 @@
 # %% import
 from matplotlib import pyplot as plt
 import gea
-import math as m
+import time
 from main import fungsiFitness, stopping_crit
 
 # %% hipothesis dan fitness
@@ -42,7 +42,8 @@ def tuner_h(fenotip):
                           maks_generasi=maks_generasi,
                           crossover_rate=x_rate,
                           peluang_mutasi=p_mut,
-                          rekam_history=False)
+                          rekam_history=False,
+                          verbose=0)
     sum_fit += fungsiFitness(fen)
     sum_it += it
 
@@ -67,12 +68,18 @@ ranges = (
 tuner = gea.Gea(fungsi_fitness=tuner_fit_func,
               ranges=ranges,
               resolusi=8,
-              ukuran_populasi=16)
+              ukuran_populasi=20)
 
-fen, _, rekaman = tuner.fit(maks_generasi=20,
-                            peluang_mutasi=.06,
+start_time = time.time()
+
+fen, _, rekaman = tuner.fit(maks_generasi=26,
+                            peluang_mutasi=.05,
+                            crossover_rate=.45,
                             rekam_history=True,
                             verbose=1)
+
+eta = time.time() - start_time
+print('Elapsed time: %.2f s', eta)
 
 print(fen)
 print(tuner_h(fen))
