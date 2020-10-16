@@ -5,9 +5,8 @@
 #
 # ditulis oleh Jordi Yaputra (130110353)
 
-""" Segel
-# [dapat buka dengan cara berikan '#' di baris 8 dan
-# baris akhir]
+""" ============= Segel =============
+# [dapat buka dengan cara berikan '#' di baris 8]
 #
 # Untuk mencegah file ini dijalankan tanpa sengaja karena
 # dapat memakan waktu dan resources yang cukup besar.
@@ -86,4 +85,4 @@ print(tuner_h(fen))
 
 plt.plot(rekaman)
 
-"""
+# """

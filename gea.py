@@ -1,8 +1,7 @@
 # %% import
-from math import cos, sin, floor
+from math import floor
 from random import random as rand
 import enum
-import functools
 from utils import *
 
 # %% enumerasi

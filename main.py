@@ -6,8 +6,8 @@
 
 # %% import
 from matplotlib import pyplot as plt
+from math import sin, cos
 import gea
-import math as m
 
 # %% pengaturan
 verbosity_level = 1  # rentang [0, 3]
@@ -17,7 +17,7 @@ plt.style.use('seaborn-whitegrid')
 # %% fungsi hipothesis dan fitness
 def h(fenotip):
   x1, x2 = fenotip
-  return m.cos(x1) * m.sin(x2) - x1 / (x2**2 + 1)
+  return cos(x1) * sin(x2) - x1 / (x2**2 + 1)
 
 def fungsiFitnessKurang(fenotip):
   return 3 - h(fenotip)
@@ -32,16 +32,16 @@ def fungsiFitnessEksponen(fenotip):
 
 """ tebakan terbaik
 # hasil:
-# rata-rata generasi = 8.45
-# rata-rata fitness = 16.4908
+# rata-rata generasi = 9.9
+# rata-rata fitness = 16.490743452040977
 
 ukuran_populasi = 750
 resolusi = 10
 peluang_mutasi = .09
 crossover_rate = .7
-"""
+# """
 
-""" hasil tuning #1
+""" hasil GA Tuner #1
 # hasil:
 # rata-rata generasi = 6.05
 # rata-rata fitness  = 16.49107486703866
@@ -51,9 +51,9 @@ ukuran_populasi = 779
 resolusi = 8
 peluang_mutasi = 0.021176470588235297
 crossover_rate = 0.8694117647058823
-"""
+# """
 
-""" hasil tuning #2
+""" hasil GA Tuner #2
 # hasil:
 # rata-rata generasi = 4.2
 # rata-rata fitness  = 16.4905685130365
@@ -63,9 +63,9 @@ ukuran_populasi = 591
 resolusi = 7
 peluang_mutasi = 0.13592156862745097
 crossover_rate = 0.9470588235294117
-"""
+# """
 
-# """ hasil tuning #3
+# """ hasil GA Tuner #3
 # hasil:
 # rata-rata generasi = 3.4
 # rata-rata fitness  = 16.4905685130365
@@ -101,6 +101,7 @@ fenotip, iterasi, fitness_history = gen.fit(stopping_crit=stopping_crit,
                                             verbose=verbosity_level)
 
 print('Banyak generasi:', iterasi)
+print('Kromosom:\n', gen.best_individu[0].kromosom)
 print('fitness =', fungsiFitness(fenotip))
 print('h(x1, x2) =', h(fenotip))
 print('x1 =', fenotip[0])
